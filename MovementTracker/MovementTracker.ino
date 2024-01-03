@@ -4,7 +4,7 @@
 // Network related variables
 const char* ssid = "";  //Network name
 const char* password = "";  //Network password
-const uint16_t port = 7748;//your port number ex: 7748
+const uint16_t port = 7748;//port number difined in the Muve project: 7748
 const char* hostIP = "";  //IP of the host (computer running the synthesizer) ex: 192.168.2.50
 
 // Pins connected to the Accelerometer
