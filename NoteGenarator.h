@@ -9,182 +9,185 @@
 #include <algorithm>
 #include <random>
 
-namespace NGen
-{
-	// Rules are made for the A minor scale
-	std::map<char, char> RuleOfThirdsAMinor{
-	{'A', 'C'}, {'B', 'D'} ,{'C', 'E'},{'D', 'F'},{'E', 'G'},{'F', 'A'},{'G', 'B'}
-	};
+namespace NGen {
+    // Rules are made for the A minor scale
+    std::map<char, char> RuleOfThirdsAMinor{
+            {'A', 'C'},
+            {'B', 'D'},
+            {'C', 'E'},
+            {'D', 'F'},
+            {'E', 'G'},
+            {'F', 'A'},
+            {'G', 'B'}
+    };
 
-	std::map<char, char> RuleOfHarmonyAMinor{
-	{'B', 'C'},{'D', 'C'},{'F', 'E'},{'G', 'A'}
-	};
+    std::map<char, char> RuleOfHarmonyAMinor{
+            {'B', 'C'},
+            {'D', 'C'},
+            {'F', 'E'},
+            {'G', 'A'}
+    };
 
-	std::string AtiveNotesAMinor = "BDFG";
+    std::string ActiveNotesAMinor = "BDFG";
 
-	// Rules are made for the A major
-	std::map<char, char> RuleOfThirdsAMajor{
-	{'A', 'c'}, {'B', 'D'} ,{'c', 'E'},{'D', 'f'},{'E', 'g'},{'f', 'A'},{'g', 'B'}
-	};
+    // Rules are made for the A major
+    std::map<char, char> RuleOfThirdsAMajor{
+            {'A', 'c'},
+            {'B', 'D'},
+            {'c', 'E'},
+            {'D', 'f'},
+            {'E', 'g'},
+            {'f', 'A'},
+            {'g', 'B'}
+    };
 
-	std::map<char, char> RuleOfHarmonyAMajor{
-	{'B', 'c'},{'D', 'c'},{'f', 'E'},{'g', 'A'}
-	};
+    std::map<char, char> RuleOfHarmonyAMajor{
+            {'B', 'c'},
+            {'D', 'c'},
+            {'f', 'E'},
+            {'g', 'A'}
+    };
 
-	std::string AtiveNotesAMajor = "BDfg";
+    std::string activeNotesAMajor = "BDfg";
 
-	// Array containing all rules |MIGHT NOT BE NESSESARY|
-	std::map<char, char> Rules[] = { RuleOfThirdsAMinor, RuleOfHarmonyAMinor };
+    // Array containing all rules |MIGHT NOT BE NECESSARY|
+    std::map<char, char> Rules[] = {RuleOfThirdsAMinor, RuleOfHarmonyAMinor};
 
-	// Full note not included because it can only be played if we have one note third 
-	std::vector<std::string> NoteTypes{ "x......." , "x...", "x.","x" };
+    // Full note not included because it can only be played if we have one note third
+    std::vector<std::string> NoteTypes{"x.......", "x...", "x.", "x"};
 
-	// Used to randomly shuffle the note types array
-	std::default_random_engine rng = std::default_random_engine{};
+    // Used to randomly shuffle the note types array
+    std::default_random_engine rng = std::default_random_engine{};
 
-	// variables used for testing
-	enum ChordChange
-	{
-		NORMAL,
-		INVERTED,
-		DIMINISHED
-	};
+    // variables used for testing
+    enum ChordChange {
+        NORMAL,
+        INVERTED,
+        DIMINISHED
+    };
 
-	struct AIOutput
-	{
-		char Note;
-		int NumberOfNotes;
-		ChordChange chordChange;
+    struct AIOutput {
+        char Note;
+        int NumberOfNotes;
+        ChordChange chordChange;
 
-		AIOutput(const char& note, const int& numberOfNotes, const ChordChange& change)
-			: Note(note), NumberOfNotes(numberOfNotes), chordChange(change) {}
-	};
+        AIOutput(const char &note, const int &numberOfNotes, const ChordChange &change)
+                : Note(note), NumberOfNotes(numberOfNotes), chordChange(change) {}
+    };
 
-	// Find a musically correct sequence of beats given a number of notes
-	std::string FindSequence(std::string phrase, const int& numberOfNotes, int& accumulatedNotes, int currentNote)
-	{
-		if (phrase.size() >= 16 || accumulatedNotes >= numberOfNotes)
-			return phrase;
+    // Find a musically correct sequence of beats given a number of notes
+    std::string
+    FindSequence(std::string phrase, const int &numberOfNotes, int &accumulatedNotes, unsigned int currentNote) {
+        if (phrase.size() >= 16 || accumulatedNotes >= numberOfNotes)
+            return phrase;
 
-		for (unsigned int i = currentNote; i < NoteTypes.size(); i++)
-		{
-			if (NoteTypes[i].size() + phrase.size() > 16)
-				continue;
+        for (unsigned int i = currentNote; i < NoteTypes.size(); i++) {
+            if (NoteTypes[i].size() + phrase.size() > 16)
+                continue;
 
-			phrase += NoteTypes[i];
-			accumulatedNotes++;
+            phrase += NoteTypes[i];
+            accumulatedNotes++;
 
-			phrase = FindSequence(phrase, numberOfNotes, accumulatedNotes, i);
+            phrase = FindSequence(phrase, numberOfNotes, accumulatedNotes, i);
 
-			if (phrase.size() == 16 && numberOfNotes == accumulatedNotes)
-				return phrase;
+            if (phrase.size() == 16 && numberOfNotes == accumulatedNotes)
+                return phrase;
 
-			phrase = phrase.substr(0, phrase.size() - NoteTypes[i].size());
-			accumulatedNotes--;
-		}
+            phrase = phrase.substr(0, phrase.size() - NoteTypes[i].size());
+            accumulatedNotes--;
+        }
 
-		return phrase;
-	}
+        return phrase;
+    }
 
-	// generate a sequence of beats in a measure
-	std::string GenerateBeatSequence(const int& numberOfNotes)
-	{
-		if (numberOfNotes == 1)
-			return "x...............";
-		if (numberOfNotes == 2)
-			return "x.......x.......";
-		if (numberOfNotes == 16)
-			return "xxxxxxxxxxxxxxxx";
+    // generate a sequence of beats in a measure
+    std::string GenerateBeatSequence(const int &numberOfNotes) {
+        if (numberOfNotes == 1)
+            return "x...............";
+        if (numberOfNotes == 2)
+            return "x.......x.......";
+        if (numberOfNotes == 16)
+            return "xxxxxxxxxxxxxxxx";
 
-		std::string phrase;
-		int accumulatedNotes = 0;
+        std::string phrase;
+        int accumulatedNotes = 0;
 
-		std::shuffle(NoteTypes.begin(), NoteTypes.end(), rng);
+        std::shuffle(NoteTypes.begin(), NoteTypes.end(), rng);
 
-		return FindSequence(phrase, numberOfNotes, accumulatedNotes, 0);
-	}
+        return FindSequence(phrase, numberOfNotes, accumulatedNotes, 0);
+    }
 
-	// Generates the notes that will be played in a measure, based on starting note and the number of notes requested
-	std::string GenareateNotes(const char& axium, const unsigned int& numberOfNotes)
-	{
-		std::string notes;
-		notes += axium;
+    // Generates the notes that will be played in a measure, based on starting note and the number of notes requested
+    std::string GenerateNotes(const char &axium, const unsigned int &numberOfNotes) {
+        std::string notes;
+        notes += axium;
 
-		for (unsigned int i = 0; i < numberOfNotes - 1; i++)
-		{
-			char lastSequenceNote = notes[notes.size() - 1];
-			char note;
-			int randValue = rand() % 10;
+        for (unsigned int i = 0; i < numberOfNotes - 1; i++) {
+            char lastSequenceNote = notes[notes.size() - 1];
+            char note;
+            int randValue = rand() % 10;
 
-			if (randValue < 1)
-				note = lastSequenceNote;
-			else if (AtiveNotesAMinor.find(lastSequenceNote) != std::string::npos && randValue < 6)
-				note = RuleOfHarmonyAMinor[lastSequenceNote];
-			else
-				note = RuleOfThirdsAMinor[lastSequenceNote];
+            if (randValue < 1)
+                note = lastSequenceNote;
+            else if (ActiveNotesAMinor.find(lastSequenceNote) != std::string::npos && randValue < 6)
+                note = RuleOfHarmonyAMinor[lastSequenceNote];
+            else
+                note = RuleOfThirdsAMinor[lastSequenceNote];
 
-			notes += note;
-		}
+            notes += note;
+        }
 
-		return notes;
-	}
+        return notes;
+    }
 
-	char GenareateNote(const char& axium)
-	{
-		char lastSequenceNote = axium;
-		char note;
-		int randValue = rand() % 10;
+    char GenerateNote(const char &axium) {
+        char lastSequenceNote = axium;
+        char note;
+        int randValue = rand() % 10;
 
-		if (randValue < 1)
-			note = lastSequenceNote;
-		else if (AtiveNotesAMinor.find(lastSequenceNote) != std::string::npos && randValue < 6)
-			note = RuleOfHarmonyAMinor[lastSequenceNote];
-		else
-			note = RuleOfThirdsAMinor[lastSequenceNote];
+        if (randValue < 1)
+            note = lastSequenceNote;
+        else if (ActiveNotesAMinor.find(lastSequenceNote) != std::string::npos && randValue < 6)
+            note = RuleOfHarmonyAMinor[lastSequenceNote];
+        else
+            note = RuleOfThirdsAMinor[lastSequenceNote];
 
-		return note;
-	}
+        return note;
+    }
 
-	std::string NexGenaration(const std::string& current)
-	{
-		std::string next(1, current[0]);
-		for (const char& note : current)
-		{
-			char c = GenareateNote(note);
-			next += c;
-		}
+    std::string NexGeneration(const std::string &current) {
+        std::string next(1, current[0]);
+        for (const char &note: current) {
+            char c = GenerateNote(note);
+            next += c;
+        }
 
-		return next;
-	}
+        return next;
+    }
 
-	std::string LSystem(const std::string& axium, unsigned int numberOfNotes)
-	{
-		if (axium.size() >= numberOfNotes)
-			return axium;
+    std::string LSystem(const std::string &axium, unsigned int numberOfNotes) {
+        if (axium.size() >= numberOfNotes)
+            return axium;
 
-		return LSystem(NexGenaration(axium), numberOfNotes);
-	}
+        return LSystem(NexGeneration(axium), numberOfNotes);
+    }
 
-	std::string GetNewPhrase(int numberOfNotes, const char& firstNote)
-	{
-		std::string notes = GenareateNotes(firstNote, numberOfNotes);
-		//std::string notes = LSystem({ 1, firstNote }, numberOfNotes);
-		std::string beatSequence = GenerateBeatSequence(numberOfNotes);
+    std::string GetNewPhrase(int numberOfNotes, const char &firstNote) {
+        std::string notes = GenerateNotes(firstNote, numberOfNotes);
+        //std::string notes = LSystem({ 65, firstNote }, numberOfNotes);
+        std::string beatSequence = GenerateBeatSequence(numberOfNotes);
 
-		std::string finalSequence;
-		int notesUsed = 0;
-		for (char beat : beatSequence)
-		{
-			if (beat == 'x')
-			{
-				finalSequence += notes[notesUsed];
-				notesUsed++;
-			}
-			else
-				finalSequence += beat;
-		}
+        std::string finalSequence;
+        int notesUsed = 0;
+        for (char beat: beatSequence) {
+            if (beat == 'x') {
+                finalSequence += notes[notesUsed];
+                notesUsed++;
+            } else
+                finalSequence += beat;
+        }
 
-		std::cout << finalSequence << std::endl;
-		return finalSequence;
-	}
+        std::cout << finalSequence << std::endl;
+        return finalSequence;
+    }
 }

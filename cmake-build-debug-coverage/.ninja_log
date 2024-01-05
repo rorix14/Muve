@@ -1,0 +1,23 @@
+# ninja log v5
+8	679	7260290115608443	CMakeFiles/Muve.dir/StateMachine.cpp.obj	a29da80455806333
+8	911	7261216296618238	CMakeFiles/Muve.dir/SocketServer.cpp.obj	8d68acf582b482b1
+3	1728	7261216304730140	CMakeFiles/Muve.dir/Aplication.cpp.obj	cd548eca06fb33f9
+1729	2143	7261216308788915	Muve.exe	f61afd8f611f161b
+3	1743	7261220305141865	CMakeFiles/Muve.dir/Aplication.cpp.obj	cd548eca06fb33f9
+1743	2149	7261220309085668	Muve.exe	f61afd8f611f161b
+3	1750	7261220867669122	CMakeFiles/Muve.dir/Aplication.cpp.obj	cd548eca06fb33f9
+1750	2150	7261220871557200	Muve.exe	f61afd8f611f161b
+3	1742	7261221928616090	CMakeFiles/Muve.dir/Aplication.cpp.obj	cd548eca06fb33f9
+1743	2143	7261221932516970	Muve.exe	f61afd8f611f161b
+2	1764	7261222207821847	CMakeFiles/Muve.dir/Aplication.cpp.obj	cd548eca06fb33f9
+1765	2166	7261222211726342	Muve.exe	f61afd8f611f161b
+3	1698	7261223671026366	CMakeFiles/Muve.dir/Aplication.cpp.obj	cd548eca06fb33f9
+1699	2100	7261223674932445	Muve.exe	f61afd8f611f161b
+2	955	7261225488159225	CMakeFiles/Muve.dir/SocketServer.cpp.obj	8d68acf582b482b1
+8	1869	7261225497292837	CMakeFiles/Muve.dir/Aplication.cpp.obj	cd548eca06fb33f9
+1870	2275	7261225501220878	Muve.exe	f61afd8f611f161b
+8	684	7261226589026543	CMakeFiles/Muve.dir/StateMachine.cpp.obj	a29da80455806333
+3	1775	7261226599905709	CMakeFiles/Muve.dir/Aplication.cpp.obj	cd548eca06fb33f9
+1775	2176	7261226603799440	Muve.exe	f61afd8f611f161b
+2	1695	7261227400114351	CMakeFiles/Muve.dir/Aplication.cpp.obj	cd548eca06fb33f9
+1696	2106	7261227404098866	Muve.exe	f61afd8f611f161b

@@ -8,28 +8,27 @@
 
 #define BUFFER_SIZE 1024
 
-class SocketServer
-{
+class SocketServer {
 public:
-	void StartServer();
+    void StartServer();
 
-	SocketServer();
+    SocketServer();
 
-	~SocketServer();
+    ~SocketServer();
 
-	bool HasClient;
+    bool HasClient;
 
-	int Mood;
+    int Mood;
 
 private:
-	const int PORT = 7748;
-	std::thread _clientThread;
-	bool _ready;
+    const int PORT = 7748;
+    std::thread _clientThread;
+    bool _ready;
 
-	void HandleClientMessages(int server);
+    void HandleClientMessages(int server);
 
-	void BuildMessage(const char* message);
+    void BuildMessage(const char *message);
 
-	int ProcessMessage(const int& messageValue);
+    int ProcessMessage(const int &messageValue) const;
 };
 

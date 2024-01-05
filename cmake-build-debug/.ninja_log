@@ -1,0 +1,11 @@
+# ninja log v5
+3	1645	7260223091879751	CMakeFiles/Muve.dir/Aplication.cpp.obj	5b7acae6eca9135
+15	64	7260092849780983	CMakeFiles/Muve.dir/SoundSynthesizer.cpp.obj	2f942cb6e2f580ec
+8	932	7260140701100561	CMakeFiles/Muve.dir/SocketServer.cpp.obj	52f38ec75e4f42d4
+2	518	7260207397595588	CMakeFiles/Muve.dir/StateMachine.cpp.obj	53c35486d1c05df2
+1	106	7260223823307571	build.ninja	db37b20c7e613790
+1646	2008	7260223095427875	Muve.exe	bfd8241e71effc5b
+8	559	7261105346759107	CMakeFiles/Muve.dir/StateMachine.cpp.obj	53c35486d1c05df2
+12	918	7261105350366416	CMakeFiles/Muve.dir/SocketServer.cpp.obj	52f38ec75e4f42d4
+3	1531	7261105356438046	CMakeFiles/Muve.dir/Aplication.cpp.obj	5b7acae6eca9135
+1531	1893	7261105359985667	Muve.exe	bfd8241e71effc5b

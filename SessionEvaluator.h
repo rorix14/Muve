@@ -3,109 +3,108 @@ This file contains the functionality that saves the stat history of a user sessi
 */
 
 #pragma once
+
 #include "StateMachine.h"
 #include <string>
 
-namespace Evalautor
-{
-	struct EvaLautionMetrics
-	{
-		int SensorMood;
-		AI::ChordChange Change;
-	};
+namespace Evalautor {
+    struct EvaluationMetrics {
+        int SensorMood;
+        AI::ChordChange Change;
 
-	// saves user session history
-	std::vector<EvaLautionMetrics> OutPutHistory;
+        EvaluationMetrics(int sensorMood, AI::ChordChange change) : SensorMood(sensorMood), Change(change) {}
+    };
 
-	//float round(float var)
-	//{
-	//	float value = (int)(var * 100 + .5);
-	//	return (float)value / 100;
-	//}
+    // saves user session history
+    std::vector<EvaluationMetrics> OutPutHistory;
 
-	// evaluates a user session
-	void EvalauteSession()
-	{
-		int numberOfSongLoops = OutPutHistory.size();
-		float numberOfInversions = 0;
-		float numberOfDimished = 0;
-		int sensorAvarage = 0;
+    //float round(float var)
+    //{
+    //	float value = (int)(var * 100 + .5);
+    //	return (float)value / 100;
+    //}
 
-		float hightN = 0;
-		float midHighN = 0;
-		float midN = 0;
-		float midLowN = 0;
-		float lowN = 0;
+    // evaluates a user session
+    void EvalauteSession() {
+        unsigned int numberOfSongLoops = OutPutHistory.empty() ? 1 : OutPutHistory.size();
+        float numberOfInversions = 0;
+        float numberOfDiminished = 0;
+        unsigned int sensorAverage = 0;
 
-		for (EvaLautionMetrics output : OutPutHistory)
-		{
-			switch (output.Change)
-			{
-			case AI::INVERTED:
-				numberOfInversions++;
-			case AI::DIMINISHED:
-				numberOfDimished++;
-			default:
-				break;
-			}
+        float highN = 0;
+        float midHighN = 0;
+        float midN = 0;
+        float midLowN = 0;
+        float lowN = 0;
 
-			if (output.SensorMood < 20)
-				lowN++;
-			else if (output.SensorMood < 40)
-				midLowN++;
-			else if (output.SensorMood < 60)
-				midN++;
-			else if (output.SensorMood < 80)
-				midHighN++;
-			else
-				hightN++;
+        for (EvaluationMetrics output: OutPutHistory) {
+            switch (output.Change) {
+                case AI::INVERTED:
+                    numberOfInversions++;
+                case AI::DIMINISHED:
+                    numberOfDiminished++;
+                default:
+                    break;
+            }
 
-			sensorAvarage += output.SensorMood;
-		}
+            if (output.SensorMood < 20)
+                lowN++;
+            else if (output.SensorMood < 40)
+                midLowN++;
+            else if (output.SensorMood < 60)
+                midN++;
+            else if (output.SensorMood < 80)
+                midHighN++;
+            else
+                highN++;
 
-		sensorAvarage /= numberOfSongLoops;
+            sensorAverage += output.SensorMood;
+        }
 
-		numberOfInversions = (numberOfInversions / numberOfSongLoops) * 100;
-		numberOfDimished = (numberOfDimished / numberOfSongLoops) * 100;
+        sensorAverage /= numberOfSongLoops;
 
-		hightN = (hightN / numberOfSongLoops) * 100;
-		midHighN = (midHighN / numberOfSongLoops) * 100;
-		midN = (midN / numberOfSongLoops) * 100;
-		midLowN = (midLowN / numberOfSongLoops) * 100;
-		lowN = (lowN / numberOfSongLoops) * 100;
+        const auto numberOfSongLoopsFloat = static_cast<float>(numberOfSongLoops);
+        numberOfInversions = (numberOfInversions / numberOfSongLoopsFloat) * 100;
+        numberOfDiminished = (numberOfDiminished / numberOfSongLoopsFloat) * 100;
 
-		std::string seesionStatesmessage;
-		if (sensorAvarage < 20)
-			seesionStatesmessage.append("Very low movement over all, ");
-		else if (sensorAvarage < 40)
-			seesionStatesmessage.append("Low movement over all, ");
-		else if (sensorAvarage < 60)
-			seesionStatesmessage.append("Balanced movement over all, ");
-		else if (sensorAvarage < 80)
-			seesionStatesmessage.append("High movement over all, ");
-		else
-			seesionStatesmessage.append("Very high movement over all, ");
+        highN = (highN / numberOfSongLoopsFloat) * 100;
+        midHighN = (midHighN / numberOfSongLoopsFloat) * 100;
+        midN = (midN / numberOfSongLoopsFloat) * 100;
+        midLowN = (midLowN / numberOfSongLoopsFloat) * 100;
+        lowN = (lowN / numberOfSongLoopsFloat) * 100;
 
-		if(hightN > midHighN && hightN > midN && hightN > midLowN && hightN > lowN)
-			seesionStatesmessage.append("spent the majority of time with very high movement, ");
-		else if(midHighN > hightN && midHighN > midN && midHighN > midLowN && midHighN > lowN)
-			seesionStatesmessage.append("spent the majority of time with high movement, ");
-		else if (midN > hightN && midN > midHighN && midN > midLowN && midN > lowN)
-			seesionStatesmessage.append("spent the majority of time with balanced movement, ");
-		else if (midLowN > hightN && midLowN > midHighN && midLowN > midN && midLowN > lowN)
-			seesionStatesmessage.append("spent the majority of time with low movement, ");
-		else 
-			seesionStatesmessage.append("spent the majority of time with very low movement, ");
+        std::string sessionStatesMessage;
+        if (sensorAverage < 20)
+            sessionStatesMessage.append("Very low movement over all, ");
+        else if (sensorAverage < 40)
+            sessionStatesMessage.append("Low movement over all, ");
+        else if (sensorAverage < 60)
+            sessionStatesMessage.append("Balanced movement over all, ");
+        else if (sensorAverage < 80)
+            sessionStatesMessage.append("High movement over all, ");
+        else
+            sessionStatesMessage.append("Very high movement over all, ");
 
-		std::string inversionPercentage = "you drastically went from low to high movement "
-			+ std::to_string(numberOfInversions) + "% of time, ";
-	
-		std::string dimishedPercentage = "you drastically went from high to low movement " 
-		+ std::to_string(numberOfDimished) + "% of time";
+        if (highN > midHighN && highN > midN && highN > midLowN && highN > lowN)
+            sessionStatesMessage.append("spent the majority of time with very high movement, ");
+        else if (midHighN > highN && midHighN > midN && midHighN > midLowN && midHighN > lowN)
+            sessionStatesMessage.append("spent the majority of time with high movement, ");
+        else if (midN > highN && midN > midHighN && midN > midLowN && midN > lowN)
+            sessionStatesMessage.append("spent the majority of time with balanced movement, ");
+        else if (midLowN > highN && midLowN > midHighN && midLowN > midN && midLowN > lowN)
+            sessionStatesMessage.append("spent the majority of time with low movement, ");
+        else
+            sessionStatesMessage.append("spent the majority of time with very low movement, ");
 
-		seesionStatesmessage.append(inversionPercentage);
-		seesionStatesmessage.append(dimishedPercentage);
+        std::string inversionPercentage = "you drastically went from low to high movement "
+                                          + std::to_string(numberOfInversions) + "% of time, ";
 
-		std::cout << "Your play style was: " << seesionStatesmessage << std::endl;
-	}
+        std::string diminishedPercentage = "you drastically went from high to low movement "
+                                           + std::to_string(numberOfDiminished) + "% of time";
+
+        sessionStatesMessage.append(inversionPercentage);
+        sessionStatesMessage.append(diminishedPercentage);
+
+        std::cout << "Your play style was: " << sessionStatesMessage << std::endl;
+    }
 }
