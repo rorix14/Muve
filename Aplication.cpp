@@ -22,7 +22,7 @@ std::atomic<double> DeltaTime;
 std::vector<synth::Note> NotesPlaying;
 std::mutex notesMutex;
 // Instruments
-synth::TestInstrument Test;
+synth::KeyboardInstrument SynthKeyboard;
 synth::InstrumentBell Bell;
 synth::InstrumentBell8 Bell8;
 synth::InstrumentHarmonica Harmonica;
@@ -47,31 +47,33 @@ synth::LowPassFilter LowFilter;
 // backing track cords according to their measure
 // test AI input
 int testAIIndex = 0;
-AI::AIOutput TetsNoteGenaration[24] = {{'A', 2, AI::NORMAL},
-                                       {'D', 3, AI::NORMAL},
-                                       {'A', 3, AI::NORMAL},
-                                       {'A', 4, AI::INVERTED},
-                                       {'D', 4, AI::NORMAL},
-                                       {'D', 5, AI::NORMAL},
-                                       {'A', 5, AI::INVERTED},
-                                       {'A', 6, AI::NORMAL},
-                                       {'E', 6, AI::NORMAL},
-                                       {'D', 5, AI::NORMAL},
-                                       {'A', 5, AI::NORMAL},
-                                       {'E', 3, AI::NORMAL},
-// Second loop
-                                       {'A', 2, AI::NORMAL},
-                                       {'D', 3, AI::NORMAL},
-                                       {'A', 3, AI::DIMINISHED},
-                                       {'A', 4, AI::NORMAL},
-                                       {'D', 4, AI::NORMAL},
-                                       {'D', 5, AI::DIMINISHED},
-                                       {'A', 5, AI::NORMAL},
-                                       {'A', 6, AI::NORMAL},
-                                       {'E', 6, AI::NORMAL},
-                                       {'D', 5, AI::INVERTED},
-                                       {'A', 5, AI::NORMAL},
-                                       {'E', 3, AI::NORMAL}};
+AI::AIOutput TetsNoteGenaration[24] = {
+    {'A', 2, AI::NORMAL},
+    {'D', 3, AI::NORMAL},
+    {'A', 3, AI::NORMAL},
+    {'A', 4, AI::INVERTED},
+    {'D', 4, AI::NORMAL},
+    {'D', 5, AI::NORMAL},
+    {'A', 5, AI::INVERTED},
+    {'A', 6, AI::NORMAL},
+    {'E', 6, AI::NORMAL},
+    {'D', 5, AI::NORMAL},
+    {'A', 5, AI::NORMAL},
+    {'E', 3, AI::NORMAL},
+    // Second loop
+    {'A', 2, AI::NORMAL},
+    {'D', 3, AI::NORMAL},
+    {'A', 3, AI::DIMINISHED},
+    {'A', 4, AI::NORMAL},
+    {'D', 4, AI::NORMAL},
+    {'D', 5, AI::DIMINISHED},
+    {'A', 5, AI::NORMAL},
+    {'A', 6, AI::NORMAL},
+    {'E', 6, AI::NORMAL},
+    {'D', 5, AI::INVERTED},
+    {'A', 5, AI::NORMAL},
+    {'E', 3, AI::NORMAL}
+};
 
 int CurrentBarIndex = 0;
 // twelve bar blues cord progression in the A minor scale
@@ -79,7 +81,7 @@ char TwelveBarBluesCordProgressionTest[12] = {'A', 'D', 'A', 'A', 'D', 'D', 'A',
 
 // utility function to safely remove objects from a vector
 //Note: there multiple ways for doing this
-void SafeRemove(std::vector<synth::Note> &notes, bool(*lambda)(synth::Note const &note)) {
+void SafeRemove(std::vector<synth::Note> &notes, bool (*lambda)(synth::Note const &note)) {
     auto noteToRemove = NotesPlaying.begin();
     while (noteToRemove != notes.end()) {
         if (!lambda(*noteToRemove))
@@ -93,8 +95,8 @@ void SafeRemove(std::vector<synth::Note> &notes, bool(*lambda)(synth::Note const
 // Here result is the reversed because it was useful for this particular case
 double MapValueReverse(const double &value, const double &max1, const double &min1,
                        const double &max2, const double &min2) {
-    double percentage = (value - min1) / (max1 - min1);
-    double resultMapped = (percentage * (max2 + min2)) - min2;
+    const double percentage = (value - min1) / (max1 - min1);
+    const double resultMapped = (percentage * (max2 + min2)) - min2;
     return max2 - resultMapped;
 }
 
@@ -134,8 +136,7 @@ void RefreshPhrase(synth::Sequencer *sequencer) {
     AI::AIOutput *outPut = AISystem->OutPut;
     //AI::AIOutput* outPut = &TetsNoteGenaration[testAIIndex];
     //std::string currentPlayerBar = NGen::GetNewPhrase(rand()  % 7 + 1, rand()  % 7 + 65);
-
-    std::string currentPlayerBar = NGen::GetNewPhrase((int) outPut->NumberOfNotes, outPut->FirstNote);
+    const std::string currentPlayerBar = NGen::GetNewPhrase(static_cast<int>(outPut->NumberOfNotes), outPut->FirstNote);
 
     switch (outPut->Change) {
         case AI::INVERTED:
@@ -162,20 +163,56 @@ void RefreshPhrase(synth::Sequencer *sequencer) {
 }
 
 int main() {
-    std::cout << "Program Started\n";
+    std::cout << "Muve Started!\n";
+
     Server = new SocketServer();
-    Server->StartServer();
-    //Uncomment to have a better understanding if the ESP-32 has been successfully connected
-    //while (!Server->HasClient) {};
+
+    synth::InstrumentBase *chosenInstrument = &SynthKeyboard;
+
+    std::string userInput;
+    while (true) {
+        std::cout << "Connect to Arduino device? (y/n):";
+        std::cin >> userInput;
+
+        if (userInput == "y") {
+            Server->StartServer();
+            while (!Server->HasClient) {}
+            break;
+        }
+        if (userInput == "n") {
+            std::cout << "Chose and Instrument to play:\n";
+            while (true) {
+                std::cout << "Standard(1), Bell(2), Bell-8bit(3), Harmonica(4):";
+                std::cin >> userInput;
+                UserSensor.Volume = 0;
+                if (userInput == "1")
+                    break;
+                if (userInput == "2") {
+                    chosenInstrument = &Bell;
+                    break;
+                }
+                if (userInput == "3") {
+                    chosenInstrument = &Bell8;
+                    break;
+                }
+                if (userInput == "4") {
+                    chosenInstrument = &Harmonica;
+                    break;
+                }
+                std::cout << "Invalid instrument. Please try again.\n";
+            }
+            break;
+        }
+        std::cout << "Invalid response. Please try again.\n";
+    }
 
     AISystem = new AI::StateMachine();
 
-    std::vector<std::wstring> devices = NoiseMaker<short>::Enumerate();
+    const std::vector<std::wstring> devices = NoiseMaker<short>::Enumerate();
     NoiseMaker<short> sound(devices[0], 44100, 1, 8, 512);
     sound.SetUserFunction(&MakeNoise);
 
     auto oldTime = std::chrono::high_resolution_clock::now();
-    auto currentTime = std::chrono::high_resolution_clock::now();
     double wallTime = 0.0;
 
     // Create Sequencer
@@ -186,7 +223,7 @@ int main() {
 
     bool sessionIsOn = true;
     while (sessionIsOn) {
-        currentTime = std::chrono::high_resolution_clock::now();
+        auto currentTime = std::chrono::high_resolution_clock::now();
         DeltaTime = std::chrono::duration<double>(currentTime - oldTime).count();
         wallTime += DeltaTime;
         oldTime = currentTime;
@@ -199,25 +236,26 @@ int main() {
         }
 
         for (int k = 0; k < 17; k++) {
-            short keyState = GetAsyncKeyState((unsigned char) ("1Q2WE4R5TY7U8I9OP"[k]));
+            const short keyState = GetAsyncKeyState(static_cast<unsigned char>("1Q2WE4R5TY7U8I9OP"[k]));
 
             // Check if played note already exists in the current notes being played by the user
             notesMutex.lock();
             auto noteFound = std::find_if(NotesPlaying.begin(), NotesPlaying.end(),
-                                          [&k](synth::Note const &note) {
-                                              return note.ScalePosition == k - 1 && note.Channel == &Test;
+                                          [&k, &chosenInstrument](synth::Note const &note) {
+                                              return note.ScalePosition == k - 1 && note.Channel == chosenInstrument;
                                           });
-
             // does not have note
             if (noteFound == NotesPlaying.end()) {
                 if (keyState & 0x8000) {
-                    synth::Note newNote(k - 1, timeNow, 0.0, true, &Test);
+                    synth::Note newNote(k - 1, timeNow, 0.0, true, chosenInstrument);
                     NotesPlaying.emplace_back(newNote);
                 }
-            } else { // note exists in vector
+            } else {
+                // note exists in vector
                 if (keyState & 0x8000) // note is being held
                 {
-                    if (noteFound->OffTime > noteFound->OnTime) { // note was pressed again during released phase
+                    if (noteFound->OffTime > noteFound->OnTime) {
+                        // note was pressed again during released phase
                         noteFound->OnTime = timeNow;
                         noteFound->IsActive = true;
                     }

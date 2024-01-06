@@ -16,6 +16,8 @@ SocketServer::SocketServer() {
 }
 
 SocketServer::~SocketServer() {
+    if (!_ready) return;
+
     _ready = false;
     _clientThread.join();
     WSACleanup();
@@ -46,7 +48,7 @@ void SocketServer::StartServer() {
     // could try this instead for setting up the server address with the right IP
     InetPton(AF_INET, reinterpret_cast<LPCSTR>(L"10.72.95.19"), &serverAddr.sin_addr.s_addr);
 
-    if (bind(server, (sockaddr *) &serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+    if (bind(server, reinterpret_cast<sockaddr *>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
         std::cout << "bind() FAILED!\n";
         WSACleanup();
         return;
@@ -71,9 +73,9 @@ void SocketServer::HandleClientMessages(int server) {
         SOCKADDR_IN clientAddr;
         int clientlength = sizeof(clientAddr);
 
-        std::cout << "Looking for clients\n";
+        std::cout << "Looking for Arduino device\n";
 
-        if ((client = accept(server, (struct sockaddr *) &clientAddr, &clientlength)) == INVALID_SOCKET)
+        if ((client = accept(server, reinterpret_cast<sockaddr *>(&clientAddr), &clientlength)) == INVALID_SOCKET)
             std::cout << "accept() FAILED!\n";
 
         char ipaddclient[INET_ADDRSTRLEN];
@@ -94,7 +96,7 @@ void SocketServer::HandleClientMessages(int server) {
             std::cout << "closesocket() FAILED!";
 
         HasClient = false;
-        std::cout << "Client disconnected!" << std::endl;
+        std::cout << "Arduino device disconnected!" << std::endl;
     }
 }
 
@@ -122,7 +124,7 @@ void SocketServer::BuildMessage(const char *message) {
 // used to make a sort of gradient where values go from 10 to 90
 // the message value is within the current "mood" threshold, it does not do anything  
 int SocketServer::ProcessMessage(const int &messageValue) const {
-    int baseline = 20 * (messageValue + 1) - 10;
+    const int baseline = 20 * (messageValue + 1) - 10;
     int multiplier = 0;
 
     if (baseline < Mood)

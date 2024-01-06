@@ -25,7 +25,7 @@ namespace AI {
     struct AIMusicHelper {
         static const char TwelveBarBluesCordProgression[12];
         static const std::map<int, float> MeasureMultiplier;
-        static const std::map<char, std::array<char, 3>> BluesChordNotes;
+        static const std::map<char, std::array<char, 3> > BluesChordNotes;
     };
 
     // abstract class, and base class for every state
@@ -56,7 +56,8 @@ namespace AI {
     // array variable in the states them self's, but for this implementation they are saved in a map where the key
     // is the class to transition from
     struct Transition {
-        Transition(IState *to, std::function<bool()> condition) : To(to), Condition(std::move(condition)) {};
+        Transition(IState *to, std::function<bool()> condition) : Condition(std::move(condition)), To(to) {
+        };
 
         std::function<bool()> Condition;
 
@@ -80,11 +81,11 @@ namespace AI {
 
         void SetState(IState *newSate);
 
-        Transition GetTransition();
+        Transition GetTransition() const;
 
         IState *_currentSate;
 
-        std::map<IState *, std::vector<Transition>> _transitions;
+        std::map<IState *, std::vector<Transition> > _transitions;
 
         std::vector<Transition> _currentTransitions;
 
@@ -95,20 +96,21 @@ namespace AI {
     // written in header file for convenience
     class MoodHigh : public IState {
     public:
-        MoodHigh(AIInput *input, AIOutput *output) :
-                _input(input), _outPut(output), _numberOfNotesMultiplier(6), _moodNotes{'C', 'F', 'G'} {};
+        MoodHigh(AIInput *input, AIOutput *output) : _input(input), _outPut(output), _numberOfNotesMultiplier(6),
+                                                     _moodNotes{'C', 'F', 'G'} {
+        };
 
         void Tick() override {
             std::cout << "High\n";
-            int currentMeasure = _input->CurrentMeasure;
+            const int currentMeasure = _input->CurrentMeasure;
 
             _outPut->NumberOfNotes = _numberOfNotesMultiplier * AIMusicHelper::MeasureMultiplier.at(currentMeasure);
 
-            std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
+            const std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
                     .at(AIMusicHelper::TwelveBarBluesCordProgression[currentMeasure]);
 
-            for (char cordNote: chordNotes) {
-                for (char moodNote: _moodNotes) {
+            for (const char cordNote: chordNotes) {
+                for (const char moodNote: _moodNotes) {
                     if (moodNote == cordNote && moodNote != _outPut->FirstNote) {
                         _outPut->FirstNote = moodNote;
                         return;
@@ -137,21 +139,22 @@ namespace AI {
 
     class MoodMidHigh : public IState {
     public:
-        MoodMidHigh(AIInput *input, AIOutput *output) :
-                _input(input), _outPut(output), _numberOfNotesMultiplier(5), _moodNotes{'C', 'F', 'G'} {};
+        MoodMidHigh(AIInput *input, AIOutput *output) : _input(input), _outPut(output), _numberOfNotesMultiplier(5),
+                                                        _moodNotes{'C', 'F', 'G'} {
+        };
 
         void Tick() override {
             std::cout << "Mid High\n";
 
-            int currentMeasure = _input->CurrentMeasure;
+            const int currentMeasure = _input->CurrentMeasure;
 
             _outPut->NumberOfNotes = _numberOfNotesMultiplier * AIMusicHelper::MeasureMultiplier.at(currentMeasure);
 
-            std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
+            const std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
                     .at(AIMusicHelper::TwelveBarBluesCordProgression[currentMeasure]);
 
-            for (char cordNote: chordNotes) {
-                for (char moodNote: _moodNotes) {
+            for (const char cordNote: chordNotes) {
+                for (const char moodNote: _moodNotes) {
                     if (moodNote == cordNote && moodNote != _outPut->FirstNote) {
                         _outPut->FirstNote = moodNote;
                         return;
@@ -182,21 +185,21 @@ namespace AI {
 
     class MoodMid : public IState {
     public:
-        MoodMid(AIInput *input, AIOutput *output) :
-                _input(input), _outPut(output), _numberOfNotesMultiplier(4),
-                _moodNotes{'A', 'B', 'C', 'D', 'E', 'F', 'G'} {};
+        MoodMid(AIInput *input, AIOutput *output) : _input(input), _outPut(output), _numberOfNotesMultiplier(4),
+                                                    _moodNotes{'A', 'B', 'C', 'D', 'E', 'F', 'G'} {
+        };
 
         void Tick() override {
             std::cout << "Mid\n";
-            int currentMeasure = _input->CurrentMeasure;
+            const int currentMeasure = _input->CurrentMeasure;
 
             _outPut->NumberOfNotes = _numberOfNotesMultiplier * AIMusicHelper::MeasureMultiplier.at(currentMeasure);
 
-            std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
+            const std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
                     .at(AIMusicHelper::TwelveBarBluesCordProgression[currentMeasure]);
 
-            for (char cordNote: chordNotes) {
-                for (char moodNote: _moodNotes) {
+            for (const char cordNote: chordNotes) {
+                for (const char moodNote: _moodNotes) {
                     if (moodNote == cordNote && moodNote != _outPut->FirstNote) {
                         _outPut->FirstNote = moodNote;
                         return;
@@ -229,20 +232,21 @@ namespace AI {
 
     class MoodMidLow : public IState {
     public:
-        MoodMidLow(AIInput *input, AIOutput *output) :
-                _input(input), _outPut(output), _numberOfNotesMultiplier(3), _moodNotes{'A', 'D', 'E'} {};
+        MoodMidLow(AIInput *input, AIOutput *output) : _input(input), _outPut(output), _numberOfNotesMultiplier(3),
+                                                       _moodNotes{'A', 'D', 'E'} {
+        };
 
         void Tick() override {
             std::cout << "Mid Low\n";
-            int currentMeasure = _input->CurrentMeasure;
+            const int currentMeasure = _input->CurrentMeasure;
 
             _outPut->NumberOfNotes = _numberOfNotesMultiplier * AIMusicHelper::MeasureMultiplier.at(currentMeasure);
 
-            std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
+            const std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
                     .at(AIMusicHelper::TwelveBarBluesCordProgression[currentMeasure]);
 
-            for (char cordNote: chordNotes) {
-                for (char moodNote: _moodNotes) {
+            for (const char cordNote: chordNotes) {
+                for (const char moodNote: _moodNotes) {
                     if (moodNote == cordNote && moodNote != _outPut->FirstNote) {
                         _outPut->FirstNote = moodNote;
                         return;
@@ -274,20 +278,21 @@ namespace AI {
 
     class MoodLow : public IState {
     public:
-        MoodLow(AIInput *input, AIOutput *output) :
-                _input(input), _outPut(output), _numberOfNotesMultiplier(2), _moodNotes{'A', 'D', 'E'} {};
+        MoodLow(AIInput *input, AIOutput *output) : _input(input), _outPut(output), _numberOfNotesMultiplier(2),
+                                                    _moodNotes{'A', 'D', 'E'} {
+        };
 
         void Tick() override {
             std::cout << "Low\n";
-            int currentMeasure = _input->CurrentMeasure;
+            const int currentMeasure = _input->CurrentMeasure;
 
             _outPut->NumberOfNotes = _numberOfNotesMultiplier * AIMusicHelper::MeasureMultiplier.at(currentMeasure);
 
-            std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
+            const std::array<char, 3> chordNotes = AIMusicHelper::BluesChordNotes
                     .at(AIMusicHelper::TwelveBarBluesCordProgression[currentMeasure]);
 
-            for (char cordNote: chordNotes) {
-                for (char moodNote: _moodNotes) {
+            for (const char cordNote: chordNotes) {
+                for (const char moodNote: _moodNotes) {
                     if (moodNote == cordNote && moodNote != _outPut->FirstNote) {
                         _outPut->FirstNote = moodNote;
                         return;

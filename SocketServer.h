@@ -31,4 +31,3 @@ private:
 
     int ProcessMessage(const int &messageValue) const;
 };
-

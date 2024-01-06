@@ -18,8 +18,9 @@
 template<class T>
 class NoiseMaker {
 public:
-    explicit NoiseMaker(std::wstring outputDevice, unsigned int sampleRate = 44100, unsigned int channels = 1,
-                        unsigned int blocks = 8, unsigned int blockSamples = 512) {
+    explicit NoiseMaker(const std::wstring &outputDevice, const unsigned int sampleRate = 44100,
+                        const unsigned int channels = 1,
+                        const unsigned int blocks = 8, const unsigned int blockSamples = 512) {
         if (!Create(outputDevice, sampleRate, channels, blocks, blockSamples))
             std::cout << "Could not correctly initiate Noise Maker class" << std::endl;
     }
@@ -31,12 +32,12 @@ public:
 
     double UserProcess(int channel, double dTime) { return 0.0; }
 
-    const double &GetTime() { return _globalTime; }
+    const double &GetTime() const { return _globalTime; }
 
-    void SetUserFunction(double(*func)(int, double)) { _userFunction = func; }
+    void SetUserFunction(double (*func)(int, double)) { _userFunction = func; }
 
     static std::vector<std::wstring> Enumerate() {
-        unsigned int deviceCount = waveOutGetNumDevs();
+        const unsigned int deviceCount = waveOutGetNumDevs();
         std::vector<std::wstring> devices;
         WAVEOUTCAPS woc;
 
@@ -83,9 +84,9 @@ private:
 
         // Validate device
         std::vector<std::wstring> devices = Enumerate();
-        auto d = std::find(devices.begin(), devices.end(), outputDevice);
+        const auto d = std::find(devices.begin(), devices.end(), outputDevice);
         if (d != devices.end()) {
-            unsigned int nDeviceID = std::distance(devices.begin(), d);
+            const unsigned int nDeviceID = std::distance(devices.begin(), d);
             WAVEFORMATEX waveFormat;
             waveFormat.wFormatTag = WAVE_FORMAT_PCM;
             waveFormat.nSamplesPerSec = _sampleRate;
@@ -96,8 +97,8 @@ private:
             waveFormat.cbSize = 0;
 
             // Open Device if valid
-            if (waveOutOpen(&_hwDevice, nDeviceID, &waveFormat, (DWORD_PTR) WaveOutProcWrap, (DWORD_PTR) this,
-                            CALLBACK_FUNCTION) != S_OK)
+            if (waveOutOpen(&_hwDevice, nDeviceID, &waveFormat, reinterpret_cast<DWORD_PTR>(WaveOutProcWrap),
+                            reinterpret_cast<DWORD_PTR>(this),CALLBACK_FUNCTION) != S_OK)
                 return Destroy();
         }
 
@@ -113,7 +114,7 @@ private:
         // Link headers to block memory
         for (unsigned int n = 0; n < _blockCount; n++) {
             _waveHeaders[n].dwBufferLength = _blockSamples * sizeof(T);
-            _waveHeaders[n].lpData = (LPSTR) (_blockMemory + (n * _blockSamples));
+            _waveHeaders[n].lpData = reinterpret_cast<LPSTR>(_blockMemory + (n * _blockSamples));
         }
 
         _thread = std::thread(&NoiseMaker::MainThread, this);
@@ -121,7 +122,7 @@ private:
         return true;
     }
 
-    bool Destroy() {
+    bool Destroy() const {
         delete[] _blockMemory;
         delete[] _waveHeaders;
         return false;
@@ -132,7 +133,7 @@ private:
         _thread.join();
     }
 
-    double Clip(double sample, double max) {
+    double Clip(const double sample, const double max) {
         return sample >= 0.0 ? fmin(sample, max) : fmax(sample, -max);
     }
 
@@ -148,7 +149,7 @@ private:
 
     // Handler for sound card request for more data
     void WaveOutProc(UINT msg) {
-        _blockFree++;
+        ++_blockFree;
         std::unique_lock<std::mutex> lm(_muxBlockNotZero);
         _cvBlockNotZero.notify_one();
     }
@@ -159,10 +160,10 @@ private:
     // and then issued to the sound card.
     void MainThread() {
         _globalTime = 0.0;
-        double timeStep = 1.0 / (double) _sampleRate;
+        const double timeStep = 1.0 / static_cast<double>(_sampleRate);
 
         // get maximum integer for a type at run-time
-        auto maxSample = (double) pow(2, (sizeof(T) * 8) - 1) - 1;
+        const auto maxSample = pow(2, sizeof(T) * 8 - 1) - 1;
 
         while (_ready) {
             // Wait for block to become available
@@ -172,22 +173,22 @@ private:
                     _cvBlockNotZero.wait(lm);
             }
 
-            _blockFree--;
+            --_blockFree;
 
             // Prepare block for processing
             if (_waveHeaders[_blockCurrent].dwFlags & WHDR_PREPARED)
                 waveOutUnprepareHeader(_hwDevice, &_waveHeaders[_blockCurrent], sizeof(WAVEHDR));
 
             T newSample;
-            int currentBlock = _blockCurrent * _blockSamples;
+            const int currentBlock = _blockCurrent * _blockSamples;
 
             for (unsigned int n = 0; n < _blockSamples; n += _channels) {
                 for (int c = 0; c < _channels; c++) {
                     // User Process
                     if (_userFunction == nullptr)
-                        newSample = (T) (Clip(UserProcess(c, _globalTime), 1.0) * maxSample);
+                        newSample = static_cast<T>(Clip(UserProcess(c, _globalTime), 1.0) * maxSample);
                     else
-                        newSample = (T) (Clip(_userFunction(c, _globalTime), 1.0) * maxSample);
+                        newSample = static_cast<T>(Clip(_userFunction(c, _globalTime), 1.0) * maxSample);
 
                     _blockMemory[currentBlock + n + c] = newSample;
                 }

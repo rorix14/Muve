@@ -12,40 +12,40 @@
 namespace NGen {
     // Rules are made for the A minor scale
     std::map<char, char> RuleOfThirdsAMinor{
-            {'A', 'C'},
-            {'B', 'D'},
-            {'C', 'E'},
-            {'D', 'F'},
-            {'E', 'G'},
-            {'F', 'A'},
-            {'G', 'B'}
+        {'A', 'C'},
+        {'B', 'D'},
+        {'C', 'E'},
+        {'D', 'F'},
+        {'E', 'G'},
+        {'F', 'A'},
+        {'G', 'B'}
     };
 
     std::map<char, char> RuleOfHarmonyAMinor{
-            {'B', 'C'},
-            {'D', 'C'},
-            {'F', 'E'},
-            {'G', 'A'}
+        {'B', 'C'},
+        {'D', 'C'},
+        {'F', 'E'},
+        {'G', 'A'}
     };
 
     std::string ActiveNotesAMinor = "BDFG";
 
     // Rules are made for the A major
     std::map<char, char> RuleOfThirdsAMajor{
-            {'A', 'c'},
-            {'B', 'D'},
-            {'c', 'E'},
-            {'D', 'f'},
-            {'E', 'g'},
-            {'f', 'A'},
-            {'g', 'B'}
+        {'A', 'c'},
+        {'B', 'D'},
+        {'c', 'E'},
+        {'D', 'f'},
+        {'E', 'g'},
+        {'f', 'A'},
+        {'g', 'B'}
     };
 
     std::map<char, char> RuleOfHarmonyAMajor{
-            {'B', 'c'},
-            {'D', 'c'},
-            {'f', 'E'},
-            {'g', 'A'}
+        {'B', 'c'},
+        {'D', 'c'},
+        {'f', 'E'},
+        {'g', 'A'}
     };
 
     std::string activeNotesAMajor = "BDfg";
@@ -72,12 +72,13 @@ namespace NGen {
         ChordChange chordChange;
 
         AIOutput(const char &note, const int &numberOfNotes, const ChordChange &change)
-                : Note(note), NumberOfNotes(numberOfNotes), chordChange(change) {}
+            : Note(note), NumberOfNotes(numberOfNotes), chordChange(change) {
+        }
     };
 
     // Find a musically correct sequence of beats given a number of notes
-    std::string
-    FindSequence(std::string phrase, const int &numberOfNotes, int &accumulatedNotes, unsigned int currentNote) {
+    inline std::string FindSequence(std::string phrase, const int &numberOfNotes, int &accumulatedNotes,
+                                    const unsigned int currentNote) {
         if (phrase.size() >= 16 || accumulatedNotes >= numberOfNotes)
             return phrase;
 
@@ -101,7 +102,7 @@ namespace NGen {
     }
 
     // generate a sequence of beats in a measure
-    std::string GenerateBeatSequence(const int &numberOfNotes) {
+    inline std::string GenerateBeatSequence(const int &numberOfNotes) {
         if (numberOfNotes == 1)
             return "x...............";
         if (numberOfNotes == 2)
@@ -109,7 +110,7 @@ namespace NGen {
         if (numberOfNotes == 16)
             return "xxxxxxxxxxxxxxxx";
 
-        std::string phrase;
+        const std::string phrase;
         int accumulatedNotes = 0;
 
         std::shuffle(NoteTypes.begin(), NoteTypes.end(), rng);
@@ -118,14 +119,14 @@ namespace NGen {
     }
 
     // Generates the notes that will be played in a measure, based on starting note and the number of notes requested
-    std::string GenerateNotes(const char &axium, const unsigned int &numberOfNotes) {
+    inline std::string GenerateNotes(const char &axium, const unsigned int &numberOfNotes) {
         std::string notes;
         notes += axium;
 
         for (unsigned int i = 0; i < numberOfNotes - 1; i++) {
             char lastSequenceNote = notes[notes.size() - 1];
             char note;
-            int randValue = rand() % 10;
+            const int randValue = rand() % 10;
 
             if (randValue < 1)
                 note = lastSequenceNote;
@@ -140,10 +141,10 @@ namespace NGen {
         return notes;
     }
 
-    char GenerateNote(const char &axium) {
-        char lastSequenceNote = axium;
+    inline char GenerateNote(const char &axium) {
+        const char lastSequenceNote = axium;
         char note;
-        int randValue = rand() % 10;
+        const int randValue = rand() % 10;
 
         if (randValue < 1)
             note = lastSequenceNote;
@@ -155,31 +156,31 @@ namespace NGen {
         return note;
     }
 
-    std::string NexGeneration(const std::string &current) {
+    inline std::string NexGeneration(const std::string &current) {
         std::string next(1, current[0]);
         for (const char &note: current) {
-            char c = GenerateNote(note);
+            const char c = GenerateNote(note);
             next += c;
         }
 
         return next;
     }
 
-    std::string LSystem(const std::string &axium, unsigned int numberOfNotes) {
+    inline std::string LSystem(const std::string &axium, unsigned int numberOfNotes) {
         if (axium.size() >= numberOfNotes)
             return axium;
 
         return LSystem(NexGeneration(axium), numberOfNotes);
     }
 
-    std::string GetNewPhrase(int numberOfNotes, const char &firstNote) {
-        std::string notes = GenerateNotes(firstNote, numberOfNotes);
+    inline std::string GetNewPhrase(const int numberOfNotes, const char &firstNote) {
+        const std::string notes = GenerateNotes(firstNote, numberOfNotes);
         //std::string notes = LSystem({ 65, firstNote }, numberOfNotes);
-        std::string beatSequence = GenerateBeatSequence(numberOfNotes);
+        const std::string beatSequence = GenerateBeatSequence(numberOfNotes);
 
         std::string finalSequence;
         int notesUsed = 0;
-        for (char beat: beatSequence) {
+        for (const char beat: beatSequence) {
             if (beat == 'x') {
                 finalSequence += notes[notesUsed];
                 notesUsed++;

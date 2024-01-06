@@ -5,29 +5,29 @@ namespace AI {
             {'A', 'D', 'A', 'A', 'D', 'D', 'A', 'A', 'E', 'D', 'A', 'E'};
 
     const std::map<int, float> AIMusicHelper::MeasureMultiplier
-            {
-                    {0,  1.0f},
-                    {1,  1.0f},
-                    {2,  1.2f},
-                    {3,  1.3f},
-                    {4,  1.4f},
-                    {5,  1.4f},
-                    {6,  1.8f},
-                    {7,  1.8f},
-                    {8,  1.6f},
-                    {9,  1.4f},
-                    {10, 1.3f},
-                    {11, 1.2f}
-            };
+    {
+        {0, 1.0f},
+        {1, 1.0f},
+        {2, 1.2f},
+        {3, 1.3f},
+        {4, 1.4f},
+        {5, 1.4f},
+        {6, 1.8f},
+        {7, 1.8f},
+        {8, 1.6f},
+        {9, 1.4f},
+        {10, 1.3f},
+        {11, 1.2f}
+    };
 
-    const std::map<char, std::array<char, 3>> AIMusicHelper::BluesChordNotes
-            {
-                    {'A', {'A', 'E', 'C'}},
-                    {'D', {'D', 'F', 'A'}},
-                    {'E', {'E', 'G', 'B'}}
-            };
+    const std::map<char, std::array<char, 3> > AIMusicHelper::BluesChordNotes
+    {
+        {'A', {'A', 'E', 'C'}},
+        {'D', {'D', 'F', 'A'}},
+        {'E', {'E', 'G', 'B'}}
+    };
 
-    StateMachine::StateMachine() : _currentSate(nullptr), Input(new AIInput()), OutPut(new AIOutput()) {
+    StateMachine::StateMachine() : Input(new AIInput()), OutPut(new AIOutput()), _currentSate(nullptr) {
         OutPut->Change = NORMAL;
         OutPut->FirstNote = ' ';
         OutPut->NumberOfNotes = 1;
@@ -38,37 +38,26 @@ namespace AI {
         auto *midLow = new MoodMidLow(Input, OutPut);
         auto *low = new MoodLow(Input, OutPut);
 
-        auto highToMidHigh = [this] { return Input->MoodValue < 80; };
+        AddTransition(high, midHigh, [this] { return Input->MoodValue < 80; });
 
-        auto midHighToHigh = [this] { return Input->MoodValue > 80; };
-        auto midHighToMid = [this] { return Input->MoodValue < 60; };
+        AddTransition(midHigh, high, [this] { return Input->MoodValue > 80; });
+        AddTransition(midHigh, mid, [this] { return Input->MoodValue < 60; });
 
-        auto midToMidHigh = [this] { return Input->MoodValue > 60; };
+        AddTransition(mid, midHigh, [this] { return Input->MoodValue > 60; });
+        AddTransition(mid, midLow, [this] { return Input->MoodValue < 40; });
 
-        auto midToMidLow = [this] { return Input->MoodValue < 40; };
+        AddTransition(midLow, mid, [this] { return Input->MoodValue > 40; });
+        AddTransition(midLow, low, [this] { return Input->MoodValue < 20; });
 
-        auto midLowToMid = [this] { return Input->MoodValue > 40; };
-        auto midLowToLow = [this] { return Input->MoodValue < 20; };
-
-        auto lowToMidLow = [this] { return Input->MoodValue > 20; };
-
-        AddTransition(high, midHigh, highToMidHigh);
-
-        AddTransition(midHigh, high, midHighToHigh);
-        AddTransition(midHigh, mid, midHighToMid);
-
-        AddTransition(mid, midHigh, midToMidHigh);
-        AddTransition(mid, midLow, midToMidLow);
-
-        AddTransition(midLow, mid, midLowToMid);
-        AddTransition(midLow, low, midLowToLow);
-
-        AddTransition(low, midLow, lowToMidLow);
+        AddTransition(low, midLow, [this] { return Input->MoodValue > 20; });
 
         SetState(low);
     }
 
     StateMachine::~StateMachine() {
+        for (const auto &test: _transitions)
+            delete test.first;
+
         delete Input;
         delete OutPut;
     }
@@ -111,14 +100,15 @@ namespace AI {
     }
 
     void StateMachine::AddTransition(IState *from, IState *to, const std::function<bool()> &condition) {
-        std::vector<Transition> transitions;
-        if (_transitions.find(from) == _transitions.end())
+        if (_transitions.find(from) == _transitions.end()) {
+            const std::vector<Transition> transitions;
             _transitions[from] = transitions;
+        }
 
         _transitions[from].emplace_back(to, condition);
     }
 
-    Transition StateMachine::GetTransition() {
+    Transition StateMachine::GetTransition() const {
         for (Transition currentTransition: _currentTransitions) {
             if (currentTransition.Condition())
                 return currentTransition;

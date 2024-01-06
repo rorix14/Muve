@@ -12,7 +12,8 @@ namespace Evalautor {
         int SensorMood;
         AI::ChordChange Change;
 
-        EvaluationMetrics(int sensorMood, AI::ChordChange change) : SensorMood(sensorMood), Change(change) {}
+        EvaluationMetrics(const int sensorMood, const AI::ChordChange change) : SensorMood(sensorMood), Change(change) {
+        }
     };
 
     // saves user session history
@@ -25,8 +26,8 @@ namespace Evalautor {
     //}
 
     // evaluates a user session
-    void EvalauteSession() {
-        unsigned int numberOfSongLoops = OutPutHistory.empty() ? 1 : OutPutHistory.size();
+    inline void EvalauteSession() {
+        const unsigned int numberOfSongLoops = OutPutHistory.empty() ? 1 : OutPutHistory.size();
         float numberOfInversions = 0;
         float numberOfDiminished = 0;
         unsigned int sensorAverage = 0;
@@ -37,7 +38,7 @@ namespace Evalautor {
         float midLowN = 0;
         float lowN = 0;
 
-        for (EvaluationMetrics output: OutPutHistory) {
+        for (const EvaluationMetrics output: OutPutHistory) {
             switch (output.Change) {
                 case AI::INVERTED:
                     numberOfInversions++;
@@ -64,14 +65,14 @@ namespace Evalautor {
         sensorAverage /= numberOfSongLoops;
 
         const auto numberOfSongLoopsFloat = static_cast<float>(numberOfSongLoops);
-        numberOfInversions = (numberOfInversions / numberOfSongLoopsFloat) * 100;
-        numberOfDiminished = (numberOfDiminished / numberOfSongLoopsFloat) * 100;
+        numberOfInversions = numberOfInversions / numberOfSongLoopsFloat * 100;
+        numberOfDiminished = numberOfDiminished / numberOfSongLoopsFloat * 100;
 
-        highN = (highN / numberOfSongLoopsFloat) * 100;
-        midHighN = (midHighN / numberOfSongLoopsFloat) * 100;
-        midN = (midN / numberOfSongLoopsFloat) * 100;
-        midLowN = (midLowN / numberOfSongLoopsFloat) * 100;
-        lowN = (lowN / numberOfSongLoopsFloat) * 100;
+        highN = highN / numberOfSongLoopsFloat * 100;
+        midHighN = midHighN / numberOfSongLoopsFloat * 100;
+        midN = midN / numberOfSongLoopsFloat * 100;
+        midLowN = midLowN / numberOfSongLoopsFloat * 100;
+        lowN = lowN / numberOfSongLoopsFloat * 100;
 
         std::string sessionStatesMessage;
         if (sensorAverage < 20)
@@ -96,11 +97,11 @@ namespace Evalautor {
         else
             sessionStatesMessage.append("spent the majority of time with very low movement, ");
 
-        std::string inversionPercentage = "you drastically went from low to high movement "
-                                          + std::to_string(numberOfInversions) + "% of time, ";
+        const std::string inversionPercentage = "you drastically went from low to high movement "
+                                                + std::to_string(numberOfInversions) + "% of time, ";
 
-        std::string diminishedPercentage = "you drastically went from high to low movement "
-                                           + std::to_string(numberOfDiminished) + "% of time";
+        const std::string diminishedPercentage = "you drastically went from high to low movement "
+                                                 + std::to_string(numberOfDiminished) + "% of time";
 
         sessionStatesMessage.append(inversionPercentage);
         sessionStatesMessage.append(diminishedPercentage);
